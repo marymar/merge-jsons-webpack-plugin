@@ -63,7 +63,7 @@ module.exports = {
      *    File name can be
      *      1.File already present on the context path
      *      2.File that is generated and is present in the webpack assets
-     *   
+     *
      */
     new MergeJsonWebpackPlugin({
       "debug": false,
@@ -81,15 +81,15 @@ module.exports = {
      *  Merge content of the file and prefix the individual file name as root element of the
      *  correspoinding file content
      *  for eg:
-     *   sign_in.json 
+     *   sign_in.json
      *       {
      *         'filename':'sign_in'
      *       }
-     *   sign_up.json 
+     *   sign_up.json
      *       {
      *         'filename':'sign_up'
      *       }
-     *   
+     *
      *  --------OUTPUT----------
      *  prefixFileName.json
      *       {
@@ -115,7 +115,7 @@ module.exports = {
 
     /**
      *  Merge files and prefix them using the provided function
-     *  
+     *
      *  for eg:
      *   sign_in.en.json
      *       {
@@ -125,11 +125,11 @@ module.exports = {
      *       {
      *          "submit": "Sign up"
      *       }
-     *       
+     *
      *  The "prefixFileName" function: filePath => path.basename(filePath)
      *                                                 .split('.')[0]
      *                                                 .replace(/_+([a-z0-9])/ig, (_, char) => char.toUpperCase())
-     *   
+     *
      *  --------OUTPUT----------
      *  prefixFileNameFn.json
      *       {

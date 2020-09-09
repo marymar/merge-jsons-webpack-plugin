@@ -8,7 +8,7 @@ module.exports = {
     app: ["./app/main.js"]
   },
   output: {
-    path: path.resolve(__dirname, "build"),    
+    path: path.resolve(__dirname, "build"),
     filename: "bundle.js"
   },
   plugins: [
@@ -20,7 +20,7 @@ module.exports = {
      *  Merge one or more files by glob options
      */
     new MergeJsonWebpackPlugin({
-      "debug":false,     
+      "debug":false,
       "encoding": "ascii",
       "output": {
         "groupBy": [
@@ -33,13 +33,13 @@ module.exports = {
       "globOptions":{
         "nosort":true
       }
-    }), 
+    }),
 
     /**
      *    Merge one or more files by glob options
      */
     new MergeJsonWebpackPlugin({
-      "debug":false,     
+      "debug":false,
       "encoding": "utf8",
       "output": {
         "groupBy": [
@@ -59,33 +59,33 @@ module.exports = {
      *    File name can be
      *      1.File already present on the context path
      *      2.File that is generated and is present in the webpack assets
-     *   
+     *
      */
     new MergeJsonWebpackPlugin({
-      "debug":false,     
+      "debug":false,
       "files": ['app/files/file1.json',
                 'app/files/file2.json',
                 'app/files/file3.json',
                 'app/files/file4.txt',
                 'groupBy/locales/fr.json'],
       "output": {
-        "fileName": "files/file.json"
+        "fileName": "files/file.[hash].json"
       }
-    }), 
+    }),
 
    /**
     *  Merge content of the file and prefix the individual file name as root element of the
     *  correspoinding file content
     *  for eg:
-    *   sign_in.json 
+    *   sign_in.json
     *       {
     *         'filename':'sign_in'
     *       }
-    *   sign_up.json 
+    *   sign_up.json
     *       {
     *         'filename':'sign_up'
     *       }
-    *   
+    *
     *  --------OUTPUT----------
     *  prefixFileName.json
     *       {
@@ -105,9 +105,9 @@ module.exports = {
              'app/prefixFileName/sign_up.json'
           ],
       "output": {
-        "fileName": "prefixFileName/prefixFileName.json"
+        "fileName": "prefixFileName/[hash].prefixFileName.json"
       }
     })
-     
+
   ]
 };

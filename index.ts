@@ -1,5 +1,5 @@
 //references https://basarat.gitbooks.io/typescript/content/docs/quick/nodejs.html
-import { Promise } from "es6-promise";
+// import { Promise } from "es6-promise";
 import path = require('path');
 import Glob = require('glob');
 import fs = require('fs');
@@ -26,6 +26,8 @@ class MergeJsonWebpackPlugin {
         this.options.compiler = compiler;
 
         const emit = (compilation, done) => {
+            const hashRegex = /\[hash\]/gi;
+
             this.logger.debug('MergeJsonsWebpackPlugin emit started...');
             //initialize fileDependency array
             this.fileDependencies = [];
@@ -39,6 +41,8 @@ class MergeJsonWebpackPlugin {
             }
             if (files) {
                 let outputPath = output.fileName;
+                outputPath = outputPath.replace(hashRegex, compilation.hash)
+
                 new Promise((resolve, reject) => {
                     this.processFiles(files, outputPath, resolve, reject);
                 })
@@ -59,6 +63,7 @@ class MergeJsonWebpackPlugin {
                     return new Promise((resolve, reject) => {
                         let pattern = globs.pattern;
                         let outputPath = globs.fileName;
+                        outputPath = outputPath.replace(hashRegex, compilation.hash)
                         this._glob(pattern, globOptions).then((files) => {
                             this.processFiles(files, outputPath, resolve, reject);
                         });
@@ -108,14 +113,14 @@ class MergeJsonWebpackPlugin {
             const plugin = "MergeJsonWebpackPlugin";
             compiler.hooks.emit.tapAsync(plugin, emit);
             compiler.hooks.afterEmit.tapAsync(plugin, afterEmit);
-        } else {  //for webpack 3            
+        } else {  //for webpack 3
             compiler.plugin('emit', emit);
             compiler.plugin("after-emit", afterEmit);
         }
     };
 
     /**
-     * 
+     *
      */
     processFiles = (files, outputPath, resolve, reject) => {
         this.fileDependencies = this.fileDependencies.concat(files);
@@ -154,7 +159,7 @@ class MergeJsonWebpackPlugin {
             let filePath = path.join(contextPath, f);
             entryData = fs.readFileSync(filePath, this.options.encoding);
         } catch (e) {
-            //check if its available in assets, it happens in case of dynamically generated files 
+            //check if its available in assets, it happens in case of dynamically generated files
             //for details check issue#25
             this.logger.error(`${f} missing,looking for it in assets.`);
             if (compilation.assets[f]) {
@@ -184,7 +189,7 @@ class MergeJsonWebpackPlugin {
         let entryDataAsJSON = {};
         try {
             let fileContent = JSON.parse(entryData);
-            //to prefix object with filename ,requirement as request in issue#31            
+            // to prefix object with filename ,requirement as request in issue#31
             if (this.options.prefixFileName) {
                 if (typeof this.options.prefixFileName === 'function') {
                     entryDataAsJSON[this.options.prefixFileName(f)] = fileContent;
@@ -250,7 +255,7 @@ class MergeJsonWebpackPlugin {
     private _glob = (pattern: string, options?: any): Promise<Array<string>> => {
         return new Promise((resolve, reject) => {
             const defaultOptions = { mark: true, cwd: this.options.compiler.context };
-            new Glob(pattern, { ...defaultOptions ,...options}, function (err: any, matches: any) {
+            Glob(pattern, { ...defaultOptions ,...options}, function (err: any, matches: any) {
                 if (err) {
                     reject(err);
                 }
@@ -261,8 +266,8 @@ class MergeJsonWebpackPlugin {
 
     /**
      * after succesful generation of assets ,add it to compilation.assets
-     * @param compilation 
-     * @param res 
+     * @param compilation
+     * @param res
      */
     private addAssets(compilation: any, res: Response) {
         compilation.assets[res.filepath] = {

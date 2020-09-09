@@ -1,13 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-const es6_promise_1 = require("es6-promise");
 const path = require("path");
 const Glob = require("glob");
 const fs = require("fs");
@@ -19,6 +10,7 @@ class MergeJsonWebpackPlugin {
         this.apply = (compiler) => {
             this.options.compiler = compiler;
             const emit = (compilation, done) => {
+                const hashRegex = /\[hash\]/gi;
                 this.logger.debug('MergeJsonsWebpackPlugin emit started...');
                 this.fileDependencies = [];
                 this.options.compilation = compilation;
@@ -31,7 +23,8 @@ class MergeJsonWebpackPlugin {
                 }
                 if (files) {
                     let outputPath = output.fileName;
-                    new es6_promise_1.Promise((resolve, reject) => {
+                    outputPath = outputPath.replace(hashRegex, compilation.hash);
+                    new Promise((resolve, reject) => {
                         this.processFiles(files, outputPath, resolve, reject);
                     })
                         .then((res) => {
@@ -48,15 +41,16 @@ class MergeJsonWebpackPlugin {
                     }
                     let globOptions = this.options.globOptions || {};
                     let groupByPromises = groupBy.map((globs) => {
-                        return new es6_promise_1.Promise((resolve, reject) => {
+                        return new Promise((resolve, reject) => {
                             let pattern = globs.pattern;
                             let outputPath = globs.fileName;
+                            outputPath = outputPath.replace(hashRegex, compilation.hash);
                             this._glob(pattern, globOptions).then((files) => {
                                 this.processFiles(files, outputPath, resolve, reject);
                             });
                         });
                     });
-                    es6_promise_1.Promise.all(groupByPromises)
+                    Promise.all(groupByPromises)
                         .then((opsResponse) => {
                         opsResponse.forEach((res) => {
                             this.addAssets(compilation, res);
@@ -103,12 +97,12 @@ class MergeJsonWebpackPlugin {
         this.processFiles = (files, outputPath, resolve, reject) => {
             this.fileDependencies = this.fileDependencies.concat(files);
             let readFiles = files.map((f) => {
-                return new es6_promise_1.Promise((res, rej) => {
+                return new Promise((res, rej) => {
                     this.readFile(f, res, rej);
                 });
             });
             let mergedContents = {};
-            es6_promise_1.Promise.all(readFiles)
+            Promise.all(readFiles)
                 .then((contents) => {
                 contents.forEach((content) => {
                     mergedContents = this.mergeDeep(mergedContents, content);
@@ -212,9 +206,9 @@ class MergeJsonWebpackPlugin {
             return target;
         };
         this._glob = (pattern, options) => {
-            return new es6_promise_1.Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 const defaultOptions = { mark: true, cwd: this.options.compiler.context };
-                new Glob(pattern, __assign({}, defaultOptions, options), function (err, matches) {
+                Glob(pattern, Object.assign(Object.assign({}, defaultOptions), options), function (err, matches) {
                     if (err) {
                         reject(err);
                     }

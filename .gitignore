@@ -5,7 +5,6 @@ __build__/
 .tmp/
 stats.json
 *.log
- 
 
 .vscode/
 
@@ -38,3 +37,4 @@ pids
 *.pid
 *.seed
 
+.history
